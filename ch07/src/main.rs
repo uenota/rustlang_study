@@ -1,8 +1,22 @@
+use std::ops::Drop;
+
 #[derive(Debug)]
 struct Parent(usize, Child, Child);
 
 #[derive(Debug)]
 struct Child(usize);
+
+impl Drop for Parent {
+    fn drop(&mut self) {
+        println!("Dropping {:?}", self);
+    }
+}
+
+impl Drop for Child {
+    fn drop(&mut self) {
+        println!("Dropping {:?}", self);
+    }
+}
 
 fn main() {
     let p1 = Parent(1, Child(11), Child(12));
