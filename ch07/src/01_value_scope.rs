@@ -20,10 +20,14 @@ impl Drop for Child {
 
 fn main() {
     let p1 = Parent(1, Child(11), Child(12));
-    let p2 = p1;
-    println!("p2: {:?}", p2);
-    // println!("p1: {:?}", p1); // this causes error
 
-    let p1 = Parent(2, Child(21), Child(22));
-    println!("p1: {:?}", p1);
+    {
+        let p2 = Parent(2, Child(21), Child(22));
+        println!("(a) p1: {:?}, p2: {:?}", p1, p2);
+    }
+
+    println!("(b) p1: {:?}", p1);
+
+    let p3 = Parent(3, Child(31), Child(32));
+    println!("(a) p1: {:?}, p3: {:?}", p1, p3);
 }
