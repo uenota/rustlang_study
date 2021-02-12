@@ -1,34 +1,17 @@
-use std::ops::Drop;
+use std::collections::HashMap;
 
-#[derive(Debug)]
-struct Parent(usize, Child, Child);
-
-#[derive(Debug)]
-struct Child(usize);
-
-impl Drop for Parent {
-    fn drop(&mut self) {
-        println!("Dropping {:?}", self);
+fn process_or_default(key: char, map: &mut HashMap<char, String>) {
+    match map.get_mut(&key) {
+        Some(value) => value.push_str(", world!"),
+        None => {
+            map.insert(key, Default::default());
+        }
     }
-}
-
-impl Drop for Child {
-    fn drop(&mut self) {
-        println!("Dropping {:?}", self);
-    }
-}
-
-fn f1(p: &Parent) {
-    println!("p: {:?}", p);
-}
-
-fn f2(p: &mut Parent) {
-    p.0 *= 10;
 }
 
 fn main() {
-    let mut p1 = Parent(1, Child(11), Child(12));
-    f1(&p1);
-    f2(&mut p1);
-    println!("p1: {:?}", p1); // this causes error
+    let mut map = HashMap::new();
+    map.insert('h', "Hello".to_string());
+    process_or_default('h', &mut map);
+    println!("{:?}", map);
 }
