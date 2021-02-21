@@ -46,6 +46,10 @@ impl<T: Default> ToyVec<T> {
         }
     }
 
+    pub fn get_or<'a>(&'a self, index: usize, default: &'a T) -> &'a T {
+        self.get(index).unwrap_or(default)
+    }
+
     fn grow(&mut self) {
         std::unimplemented!();
     }
