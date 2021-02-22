@@ -1,18 +1,62 @@
+use std::rc::Rc;
+
+use std::ops::Drop;
+
+#[derive(Debug)]
+struct Parent(usize, Child, Child);
+
+#[derive(Debug)]
+struct Child(usize);
+
+impl Drop for Parent {
+    fn drop(&mut self) {
+        println!("Dropping {:?}", self);
+    }
+}
+
+impl Drop for Child {
+    fn drop(&mut self) {
+        println!("Dropping {:?}", self);
+    }
+}
+
 fn main() {
-    static I0: i32 = 42;
+    let mut rc1 = Rc::new(Child(1));
 
-    let mut s0: &'static str;
-    let s1 = "42";
-    let s2 = 42.to_string();
-    s0 = s1;
-    // s0 = s2;
+    println!("(a) count: {}, rc1: {:?}", Rc::strong_count(&rc1), rc1);
 
-    fn take_static<T: 'static>(_x: T) { }
+    {
+        let rc2 = Rc::clone(&rc1);
+        println!(
+            "(b) count: {}, rc1: {:?}, rc2: {:?}",
+            Rc::strong_count(&rc1), rc1, rc2
+        );
+    }
 
-    let s1 = "42";
-    let s2 = 42.to_string();
+    println!("(c) count: {}, rc1: {:?}", Rc::strong_count(&rc1), rc1);
 
-    take_static(s1);
-    // take_static(&s2);
-    take_static(s2);
+    if let Some(child) = Rc::get_mut(&mut rc1) {
+        child.0 += 1;
+    }
+    println!("(d) count: {}, rc1: {:?}", Rc::strong_count(&rc1), rc1);
+
+    let weak = Rc::downgrade(&rc1);
+    println!(
+        "(e) count: {}, rc1: {:?}, weak: {:?}",
+        Rc::strong_count(&rc1),
+        rc1,
+        weak,
+    );
+
+    if let Some(rc3) = weak.upgrade() {
+        println!(
+            "(f) count: {}, rc1: {:?}, rc3: {:?}",
+            Rc::strong_count(&rc1),
+            rc1,
+            rc3,
+        );
+    }
+
+    std::mem::drop(rc1);
+    println!("(g) count: 0, weak.upgrade(): {:?}", weak.upgrade());
 }
