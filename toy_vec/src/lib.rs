@@ -3,6 +3,12 @@ pub struct ToyVec<T> {
     len: usize,
 }
 
+pub struct Iter<'vec, T> {
+    elements: &'vec Box<[T]>,
+    len: usize,
+    pos: usize,
+}
+
 impl<T: Default> ToyVec<T> {
     pub fn new() -> Self {
         Self::with_capacity(0)
@@ -70,5 +76,36 @@ impl<T: Default> ToyVec<T> {
                 self.elements[i] = elem;
             }
         }
+    }
+
+    pub fn iter<'vec>(&'vec self) -> Iter<'vec, T> {
+        Iter {
+            elements: &self.elements,
+            len: self.len,
+            pos: 0,
+        }
+    }
+}
+
+impl<'vec, T> Iterator for Iter<'vec, T> {
+    type Item = &'vec T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.len {
+            None
+        } else {
+            let res = Some(&self.elements[self.pos]);
+            self.pos += 1;
+            res
+        }
+    }
+}
+
+impl<'vec, T: Default> IntoIterator for &'vec ToyVec<T> {
+    type Item = &'vec T;
+    type IntoIter = Iter<'vec, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
