@@ -52,22 +52,12 @@ impl Coordinates for (f64, f64) {
     }
 }
 
-fn print_point(point: impl Coordinates) {
-    let p = point.to_cartesian();
-    println!("({}, {})", p.x, p.y);
-}
-
-fn as_cartesian<P: Coordinates + Clone>(point: P) -> CartesianCoord {
-    point.clone().to_cartesian()
-}
-
 fn main() {
-    print_point((0.0, 1.0));
+    let point = (1.0, 1.0);
 
-    print_point(PolarCoord {
-        r: 1.0,
-        theta: std::f64::consts::PI / 2.0,
-    });
-    
-    // print_point("string");
+    let c = point.to_cartesian();
+    println!("x = {}, y = {}", c.x, c.y);
+
+    let p = PolarCoord::from_cartesian(c);
+    println!("r = {}, Θ = {}", p.r, p.theta);
 }
