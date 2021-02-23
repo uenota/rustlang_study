@@ -1,31 +1,40 @@
-use lazy_static::lazy_static;
-use std::collections::HashSet;
-use std::error::Error;
-use std::sync::RwLock;
-
-lazy_static! {
-    pub static ref DOGS: RwLock<HashSet<&'static str>> = {
-        let dogs = ["柴", "トイプードル"].iter().cloned().collect();
-        RwLock::new(dogs)
-    };
+fn apply_fn<F>(f: &F, ch: char) where F: Fn(char) -> bool {
+    assert!(f(ch));
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    {
-        let dogs = DOGS.read()?;
-        assert!(dogs.contains("柴"));
-        assert!(dogs.contains("トイプードル"));
-    }
+fn apply_fn_mut<F>(f: &mut F, ch: char) where F: FnMut(char) -> bool {
+    assert!(f(ch));
+}
 
-    fn stringify(x: impl ToString) -> String { x.to_string() }
+fn apply_fn_once<F>(f: F, ch: char) where F: FnOnce(char) -> bool {
+    assert!(f(ch));
+}
 
-    DOGS.write()?.insert("ブル・テリア");
+fn main() {
+    let s1 = "read-only";
+    let mut lookup = |ch: char| s1.find(ch).is_some();
+    apply_fn(&lookup, 'r');
+    apply_fn_mut(&mut lookup, 'o');
+    apply_fn_once(lookup, 'y');
+    assert_eq!(s1, "read-only");
 
-    std::thread::spawn(||
-        DOGS.write().map(|mut ds| ds.insert("コーギー")).map_err(stringify)
-    ).join().expect("Thread error")?;
+    let mut s2 = "append".to_string();
+    let mut modify = |ch| {
+        s2.push(ch);
+        true
+    };
+    // apply_fn(&modify, 'e');
+    apply_fn_mut(&mut modify, 'e');
+    apply_fn_once(modify, 'd');
+    assert_eq!(s2, "appended");
 
-    assert!(DOGS.read()?.contains("ブル・テリア"));
-    assert!(DOGS.read()?.contains("コーギー"));
-    Ok(())
+    let s3 = "be converted".to_string();
+    let mut consume = |ch| {
+        let bytes = s3.into_bytes();
+        bytes.contains(&(ch as u8))
+    };
+    // apply_fn(&consume, 'b');
+    // apply_fn_mut(&mut consume, 'c');
+    apply_fn_once(consume, 'd');
+    // assert_eq!(s3, "error");
 }
