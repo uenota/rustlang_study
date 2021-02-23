@@ -8,9 +8,15 @@ struct PolarCoord {
     theta: f64,
 }
 
+struct Matrix([[f64; 2]; 2]);
+
 trait Coordinates {
     fn to_cartesian(self) -> CartesianCoord;
     fn from_cartesian(cart: CartesianCoord) -> Self;
+}
+
+trait LinearTransform: Coordinates {
+    fn transform(self, matrix: &Matrix) -> Self;
 }
 
 impl Coordinates for CartesianCoord {
@@ -49,6 +55,18 @@ impl Coordinates for (f64, f64) {
     
     fn from_cartesian(cart: CartesianCoord) -> Self {
         (cart.x, cart.y)
+    }
+}
+
+impl LinearTransform for CartesianCoord {
+    fn transform(mut self, matrix: &Matrix) -> Self {
+        let x = self.x;
+        let y = self.y;
+        let m = matrix.0;
+
+        self.x = m[0][0] * x + m[0][1] * y;
+        self.y = m[1][0] * x + m[1][1] * y;
+        self
     }
 }
 
