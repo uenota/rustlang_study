@@ -1,21 +1,23 @@
-struct CartesianCoord {
-    x: f64,
-    y: f64,
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
+pub struct CartesianCoord {
+    pub x: f64,
+    pub y: f64,
 }
 
-struct PolarCoord {
-    r: f64,
-    theta: f64,
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
+pub struct PolarCoord {
+    pub r: f64,
+    pub theta: f64,
 }
 
-struct Matrix([[f64; 2]; 2]);
+pub struct Matrix([[f64; 2]; 2]);
 
-trait Coordinates {
+pub trait Coordinates {
     fn to_cartesian(self) -> CartesianCoord;
     fn from_cartesian(cart: CartesianCoord) -> Self;
 }
 
-trait LinearTransform: Coordinates {
+pub trait LinearTransform: Coordinates {
     fn transform(self, matrix: &Matrix) -> Self
     where
         Self: Sized
